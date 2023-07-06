@@ -23,14 +23,16 @@ from detectron2.data import DatasetMapper
 
 from odise.data import (
     COCOPanopticDatasetMapper,
+    ADEPanopticDatasetMapper,
     build_d2_test_dataloader,
     build_d2_train_dataloader,
     get_openseg_labels,
 )
 from odise.evaluation.d2_evaluator import (
-    COCOEvaluator,
-    COCOPanopticEvaluator,
-    SemSegEvaluator,
+#    COCOEvaluator,
+    InstanceSegEvaluator,
+#    COCOPanopticEvaluator,
+#    SemSegEvaluator,
 )
 from odise.modeling.wrapper.pano_wrapper import OpenPanopticInference
 from detectron2.data import MetadataCatalog
@@ -39,9 +41,13 @@ dataloader = OmegaConf.create()
 
 dataloader.train = L(build_d2_train_dataloader)(
     dataset=L(get_detection_dataset_dicts)(
-        names="coco_2017_train_panoptic_with_sem_seg", filter_empty=True
+        #names="coco_2017_train_panoptic_with_sem_seg", 
+        names="ade20k_panoptic_train",
+        filter_empty=True
     ),
-    mapper=L(COCOPanopticDatasetMapper)(
+    #mapper=L(COCOPanopticDatasetMapper)(
+    mapper=L(ADEPanopticDatasetMapper)(    
+    #mapper=L(DatasetMapper)(
         is_train=True,
         # COCO LSJ aug
         augmentations=[
@@ -62,7 +68,10 @@ dataloader.train = L(build_d2_train_dataloader)(
 
 dataloader.test = L(build_d2_test_dataloader)(
     dataset=L(get_detection_dataset_dicts)(
-        names="coco_2017_val_panoptic_with_sem_seg",
+        #names="coco_2017_val_panoptic_with_sem_seg",
+        names="ade20k_panoptic_val",
+        #names="ade20k_full_sem_seg_val",
+
         filter_empty=False,
     ),
     mapper=L(DatasetMapper)(
@@ -77,19 +86,26 @@ dataloader.test = L(build_d2_test_dataloader)(
 )
 
 dataloader.evaluator = [
-    L(COCOEvaluator)(
+#    L(COCOEvaluator)(
+#        dataset_name="${...test.dataset.names}",
+#        tasks=("segm",),
+#    ),
+    L(InstanceSegEvaluator)(
         dataset_name="${...test.dataset.names}",
         tasks=("segm",),
-    ),
-    L(SemSegEvaluator)(
-        dataset_name="${...test.dataset.names}",
-    ),
-    L(COCOPanopticEvaluator)(
-        dataset_name="${...test.dataset.names}",
-    ),
+    ), 
+#    L(SemSegEvaluator)(
+#        dataset_name="${...test.dataset.names}",
+#    ),
+#    L(COCOPanopticEvaluator)(
+#        dataset_name="${...test.dataset.names}",
+#    ),
 ]
 
 dataloader.wrapper = L(OpenPanopticInference)(
-    labels=L(get_openseg_labels)(dataset="coco_panoptic", prompt_engineered=True),
+    #labels=L(get_openseg_labels)(dataset="coco_panoptic", prompt_engineered=True),
+    labels=L(get_openseg_labels)(dataset="ade20k_150", prompt_engineered=True),
+    #labels=L(get_openseg_labels)(dataset="ade20k_847", prompt_engineered=True),
+
     metadata=L(MetadataCatalog.get)(name="${...test.dataset.names}"),
 )
