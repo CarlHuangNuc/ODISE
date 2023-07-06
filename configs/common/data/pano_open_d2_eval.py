@@ -65,9 +65,11 @@ coco133_open_eval.evaluator = [
     L(SemSegEvaluator)(
         dataset_name="${...loader.dataset.names}",
     ),
-    L(COCOPanopticEvaluator)(
-        dataset_name="${...loader.dataset.names}",
-    ),
+#    L(COCOPanopticEvaluator)(
+#        dataset_name="${...loader.dataset.names}",
+#    ),
+
+
 ]
 
 ade150_open_eval = OmegaConf.create()
@@ -91,6 +93,11 @@ ade150_open_eval.loader = L(build_d2_test_dataloader)(
 ade150_open_eval.wrapper = L(OpenPanopticInference)(
     labels=L(get_openseg_labels)(dataset="ade20k_150", prompt_engineered=True),
     metadata=L(MetadataCatalog.get)(name=ade150_open_eval.loader.dataset.names),
+
+#    semantic_on=False,
+#    instance_on=True,
+#    panoptic_on=False,
+
 )
 
 ade150_open_eval.evaluator = [
@@ -98,12 +105,12 @@ ade150_open_eval.evaluator = [
         dataset_name="${...loader.dataset.names}",
         tasks=("segm",),
     ),
-    L(SemSegEvaluator)(
-        dataset_name="${...loader.dataset.names}",
-    ),
-    L(COCOPanopticEvaluator)(
-        dataset_name="${...loader.dataset.names}",
-    ),
+#    L(SemSegEvaluator)(
+#        dataset_name="${...loader.dataset.names}",
+#    ),
+#    L(COCOPanopticEvaluator)(
+#        dataset_name="${...loader.dataset.names}",
+#    ),
 ]
 
 ade847_open_eval = OmegaConf.create()
@@ -130,12 +137,19 @@ ade847_open_eval.wrapper = L(OpenPanopticInference)(
     semantic_on=True,
     instance_on=False,
     panoptic_on=False,
+
+    #semantic_on=False,
+    #instance_on=True,
+    #panoptic_on=False,
+    
 )
 
 ade847_open_eval.evaluator = [
+        
     L(SemSegEvaluator)(
         dataset_name="${...loader.dataset.names}",
     ),
+    
 ]
 
 ctx59_open_eval = OmegaConf.create()
@@ -233,4 +247,3 @@ pas21_open_eval.evaluator = [
         dataset_name="${...loader.dataset.names}",
     ),
 ]
-### carl commited
